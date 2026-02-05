@@ -1,33 +1,59 @@
 const router = require("express").Router();
 
 /**
- * GET /tasks
- * Devuelve una lista de tareas (por ahora, en memoria).
+ * "Base de datos" temporal en memoria
  */
-const tasks = []; // "base de datos" temporal en memoria
+const tasks = [];
+
+/**
+ * GET /tasks
+ * Lista tareas
+ */
+router.get("/", (req, res) => {
+  return res.json(tasks);
+});
+
+/**
+ * POST /tasks
+ * Crea una tarea
+ */
+router.post("/", (req, res) => {
+  const { title } = req.body;
+
+  if (!title || typeof title !== "string" || title.trim().length === 0) {
+    return res.status(400).json({
+      error: "title is required and must be a non-empty string",
+    });
+  }
+
+  const newTask = {
+    id: tasks.length + 1,
+    title: title.trim(),
+    done: false,
+    createdAt: new Date().toISOString(),
+  };
+
+  tasks.push(newTask);
+  return res.status(201).json(newTask);
+});
 
 /**
  * GET /tasks/:id
- * Devuelve una tarea por su id
+ * Devuelve una tarea por id
  */
 router.get("/:id", (req, res) => {
-  const { id } = req.params; // viene como string
-  const taskId = Number(id); // lo convertimos a número
+  const taskId = Number(req.params.id);
 
-  // Si no es un número, el cliente ha enviado mal la URL
   if (Number.isNaN(taskId)) {
     return res.status(400).json({ error: "id must be a number" });
   }
 
-  // Buscamos la tarea en la "BD" en memoria
   const task = tasks.find((t) => t.id === taskId);
 
-  // Si no existe, es un recurso inexistente
   if (!task) {
     return res.status(404).json({ error: "task not found" });
   }
 
-  // Si existe, devolvemos la tarea
   return res.json(task);
 });
 
@@ -50,22 +76,18 @@ router.put("/:id", (req, res) => {
 
   const { title, done } = req.body;
 
-  // Validación: si viene title, debe ser string no vacío
   if (title !== undefined) {
     if (typeof title !== "string" || title.trim().length === 0) {
-      return res.status(400).json({
-        error: "title must be a non-empty string",
-      });
+      return res
+        .status(400)
+        .json({ error: "title must be a non-empty string" });
     }
     task.title = title.trim();
   }
 
-  // Validación: si viene done, debe ser boolean
   if (done !== undefined) {
     if (typeof done !== "boolean") {
-      return res.status(400).json({
-        error: "done must be a boolean",
-      });
+      return res.status(400).json({ error: "done must be a boolean" });
     }
     task.done = done;
   }
@@ -74,30 +96,24 @@ router.put("/:id", (req, res) => {
 });
 
 /**
- * POST /tasks
- * Crea una tarea nueva.
+ * DELETE /tasks/:id
+ * Elimina una tarea por id
  */
-router.post("/", (req, res) => {
-  const { title } = req.body;
+router.delete("/:id", (req, res) => {
+  const taskId = Number(req.params.id);
 
-  // Validación mínima
-  if (!title || typeof title !== "string" || title.trim().length === 0) {
-    return res.status(400).json({
-      error: "title is required and must be a non-empty string",
-    });
+  if (Number.isNaN(taskId)) {
+    return res.status(400).json({ error: "id must be a number" });
   }
 
-  const newTask = {
-    id: tasks.length + 1,
-    title: title.trim(),
-    done: false,
-    createdAt: new Date().toISOString(),
-  };
+  const index = tasks.findIndex((t) => t.id === taskId);
 
-  tasks.push(newTask);
+  if (index === -1) {
+    return res.status(404).json({ error: "task not found" });
+  }
 
-  // 201 = creado correctamente
-  return res.status(201).json(newTask);
+  tasks.splice(index, 1);
+  return res.status(204).send();
 });
 
 module.exports = router;
