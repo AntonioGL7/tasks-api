@@ -6,8 +6,29 @@ const router = require("express").Router();
  */
 const tasks = []; // "base de datos" temporal en memoria
 
-router.get("/", (req, res) => {
-  res.json(tasks);
+/**
+ * GET /tasks/:id
+ * Devuelve una tarea por su id
+ */
+router.get("/:id", (req, res) => {
+  const { id } = req.params; // viene como string
+  const taskId = Number(id); // lo convertimos a número
+
+  // Si no es un número, el cliente ha enviado mal la URL
+  if (Number.isNaN(taskId)) {
+    return res.status(400).json({ error: "id must be a number" });
+  }
+
+  // Buscamos la tarea en la "BD" en memoria
+  const task = tasks.find((t) => t.id === taskId);
+
+  // Si no existe, es un recurso inexistente
+  if (!task) {
+    return res.status(404).json({ error: "task not found" });
+  }
+
+  // Si existe, devolvemos la tarea
+  return res.json(task);
 });
 
 /**
