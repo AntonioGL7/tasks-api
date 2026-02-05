@@ -62,3 +62,16 @@ Content-Type: application/json
 {
   "done": "yes"
 }
+
+
+### Delete existing task
+DELETE http://localhost:3000/tasks/1
+
+### Delete non-existing task
+DELETE http://localhost:3000/tasks/999
+
+### Delete invalid id
+DELETE http://localhost:3000/tasks/abc
+
+### List tasks after delete
+GET http://localhost:3000/tasks
