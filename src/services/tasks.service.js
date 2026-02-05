@@ -1,6 +1,7 @@
 // src/services/tasks.service.js
 
-const tasks = []; // almacenamiento en memoria
+const tasks = [];
+let nextId = 1; // contador de IDs
 
 function listTasks() {
   return tasks;
@@ -8,7 +9,7 @@ function listTasks() {
 
 function createTask(title) {
   const newTask = {
-    id: tasks.length + 1,
+    id: nextId++, // ID único, no se repite
     title: title.trim(),
     done: false,
     createdAt: new Date().toISOString(),
