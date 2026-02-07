@@ -6,10 +6,11 @@ async function listTasks() {
   return prisma.task.findMany({ orderBy: { id: "asc" } });
 }
 
-async function createTask(title) {
+async function createTask(title, description) {
   return prisma.task.create({
     data: {
       title: title.trim(),
+      description: description !== undefined ? description.trim() : null,
       done: false,
     },
   });
@@ -25,6 +26,8 @@ async function updateTask(id, data) {
     data: {
       title: data.title !== undefined ? data.title : undefined,
       done: data.done !== undefined ? data.done : undefined,
+      description:
+        data.description !== undefined ? data.description : undefined,
     },
   });
 }

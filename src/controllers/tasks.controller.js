@@ -18,15 +18,20 @@ async function listTasks(req, res) {
 }
 
 async function createTask(req, res) {
-  const { title } = req.body;
+  const { title, description } = req.body;
 
   if (!title || typeof title !== "string" || title.trim().length === 0) {
     return res.status(400).json({
       error: "title is required and must be a non-empty string",
     });
   }
+  if (description !== undefined) {
+    if (typeof description !== "string") {
+      return res.status(400).json({ error: "description must be a string" });
+    }
+  }
 
-  const newTask = await tasksService.createTask(title);
+  const newTask = await tasksService.createTask(title, description);
   return res.status(201).json(newTask);
 }
 
@@ -46,13 +51,18 @@ async function updateTask(req, res) {
   const taskId = parseId(req, res);
   if (!taskId) return;
 
-  const { title, done } = req.body;
+  const { title, done, description } = req.body;
 
   if (title !== undefined) {
     if (typeof title !== "string" || title.trim().length === 0) {
       return res
         .status(400)
         .json({ error: "title must be a non-empty string" });
+    }
+  }
+  if (description !== undefined) {
+    if (typeof description !== "string") {
+      return res.status(400).json({ error: "description must be a string" });
     }
   }
 
@@ -66,6 +76,7 @@ async function updateTask(req, res) {
     const updated = await tasksService.updateTask(taskId, {
       title: title !== undefined ? title.trim() : undefined,
       done,
+      description: description !== undefined ? description.trim() : undefined,
     });
 
     return res.json(updated);
