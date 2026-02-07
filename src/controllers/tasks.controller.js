@@ -1,6 +1,4 @@
 // src/controllers/tasks.controller.js
-
-const { Prisma } = require("@prisma/client");
 const tasksService = require("../services/tasks.service");
 
 function parseId(req, res) {
@@ -13,8 +11,9 @@ function parseId(req, res) {
 }
 
 async function listTasks(req, res, next) {
-  let { page, limit } = req.query;
+  let { page, limit, done } = req.query;
 
+  // page/limit
   page = page !== undefined ? Number(page) : undefined;
   limit = limit !== undefined ? Number(limit) : undefined;
 
@@ -26,14 +25,22 @@ async function listTasks(req, res, next) {
     return res.status(400).json({ error: "limit must be a positive number" });
   }
 
-  try {
-    const tasks = await tasksService.listTasks({ page, limit });
+  // done filter
+  if (done !== undefined) {
+    if (done === "true") done = true;
+    else if (done === "false") done = false;
+    else return res.status(400).json({ error: "done must be true or false" });
+  }
 
+  try {
+    const tasks = await tasksService.listTasks({ page, limit, done });
+
+    // Sin paginación: compatibilidad (devuelve array)
     if (page === undefined || limit === undefined) {
       return res.json(tasks);
     }
 
-    const total = await tasksService.countTasks();
+    const total = await tasksService.countTasks({ done });
     const pages = Math.ceil(total / limit);
 
     return res.json({
@@ -53,10 +60,9 @@ async function createTask(req, res) {
       error: "title is required and must be a non-empty string",
     });
   }
-  if (description !== undefined) {
-    if (typeof description !== "string") {
-      return res.status(400).json({ error: "description must be a string" });
-    }
+
+  if (description !== undefined && typeof description !== "string") {
+    return res.status(400).json({ error: "description must be a string" });
   }
 
   const newTask = await tasksService.createTask(title, description);
@@ -89,16 +95,12 @@ async function updateTask(req, res, next) {
     }
   }
 
-  if (description !== undefined) {
-    if (typeof description !== "string") {
-      return res.status(400).json({ error: "description must be a string" });
-    }
+  if (description !== undefined && typeof description !== "string") {
+    return res.status(400).json({ error: "description must be a string" });
   }
 
-  if (done !== undefined) {
-    if (typeof done !== "boolean") {
-      return res.status(400).json({ error: "done must be a boolean" });
-    }
+  if (done !== undefined && typeof done !== "boolean") {
+    return res.status(400).json({ error: "done must be a boolean" });
   }
 
   try {

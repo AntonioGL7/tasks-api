@@ -1,11 +1,14 @@
 // src/services/tasks.service.js
-
 const prisma = require("../config/prisma");
 
-async function listTasks({ page, limit } = {}) {
+async function listTasks({ page, limit, done } = {}) {
   const query = {
     orderBy: { id: "asc" },
   };
+
+  if (done !== undefined) {
+    query.where = { done };
+  }
 
   if (page !== undefined && limit !== undefined) {
     query.skip = (page - 1) * limit;
@@ -46,8 +49,10 @@ async function deleteTask(id) {
   return true;
 }
 
-async function countTasks() {
-  return prisma.task.count();
+async function countTasks({ done } = {}) {
+  return prisma.task.count({
+    where: done !== undefined ? { done } : undefined,
+  });
 }
 
 module.exports = {
