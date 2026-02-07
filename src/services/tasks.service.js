@@ -1,9 +1,15 @@
 // src/services/tasks.service.js
 const prisma = require("../config/prisma");
 
-async function listTasks({ page, limit, done } = {}) {
+async function listTasks({
+  page,
+  limit,
+  done,
+  sort = "id",
+  order = "asc",
+} = {}) {
   const query = {
-    orderBy: { id: "asc" },
+    orderBy: { [sort]: order },
   };
 
   if (done !== undefined) {

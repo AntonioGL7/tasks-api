@@ -11,7 +11,7 @@ function parseId(req, res) {
 }
 
 async function listTasks(req, res, next) {
-  let { page, limit, done } = req.query;
+  let { page, limit, done, sort, order } = req.query;
 
   // page/limit
   page = page !== undefined ? Number(page) : undefined;
@@ -32,8 +32,41 @@ async function listTasks(req, res, next) {
     else return res.status(400).json({ error: "done must be true or false" });
   }
 
+  // sort/order
+  const allowedSort = new Set([
+    "id",
+    "title",
+    "done",
+    "createdAt",
+    "updatedAt",
+  ]);
+
+  if (sort !== undefined) {
+    if (!allowedSort.has(sort)) {
+      return res.status(400).json({
+        error: "sort must be one of: id, title, done, createdAt, updatedAt",
+      });
+    }
+  } else {
+    sort = "id";
+  }
+
+  if (order !== undefined) {
+    if (order !== "asc" && order !== "desc") {
+      return res.status(400).json({ error: "order must be asc or desc" });
+    }
+  } else {
+    order = "asc";
+  }
+
   try {
-    const tasks = await tasksService.listTasks({ page, limit, done });
+    const tasks = await tasksService.listTasks({
+      page,
+      limit,
+      done,
+      sort,
+      order,
+    });
 
     // Sin paginación: compatibilidad (devuelve array)
     if (page === undefined || limit === undefined) {
