@@ -47,7 +47,7 @@ async function getTask(req, res) {
   return res.json(task);
 }
 
-async function updateTask(req, res) {
+async function updateTask(req, res, next) {
   const taskId = parseId(req, res);
   if (!taskId) return;
 
@@ -60,6 +60,7 @@ async function updateTask(req, res) {
         .json({ error: "title must be a non-empty string" });
     }
   }
+
   if (description !== undefined) {
     if (typeof description !== "string") {
       return res.status(400).json({ error: "description must be a string" });
@@ -81,17 +82,11 @@ async function updateTask(req, res) {
 
     return res.json(updated);
   } catch (err) {
-    if (
-      err instanceof Prisma.PrismaClientKnownRequestError &&
-      err.code === "P2025"
-    ) {
-      return res.status(404).json({ error: "task not found" });
-    }
-    throw err;
+    return next(err);
   }
 }
 
-async function deleteTask(req, res) {
+async function deleteTask(req, res, next) {
   const taskId = parseId(req, res);
   if (!taskId) return;
 
@@ -99,13 +94,7 @@ async function deleteTask(req, res) {
     await tasksService.deleteTask(taskId);
     return res.status(204).send();
   } catch (err) {
-    if (
-      err instanceof Prisma.PrismaClientKnownRequestError &&
-      err.code === "P2025"
-    ) {
-      return res.status(404).json({ error: "task not found" });
-    }
-    throw err;
+    return next(err);
   }
 }
 

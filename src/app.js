@@ -15,3 +15,7 @@ app.get("/health", (req, res) => {
 app.use("/tasks", tasksRoutes);
 
 module.exports = app;
+
+const errorMiddleware = require("./middlewares/error.middleware");
+
+app.use(errorMiddleware);

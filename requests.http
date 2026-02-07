@@ -9,12 +9,14 @@ POST http://localhost:3000/tasks
 Content-Type: application/json
 
 {
-  "title": "Primera tarea"
+  "title": "Tarea con desc",
+  "description": "esto es una descripción"
 }
 
 
+
 ### Get task by id
-GET http://localhost:3000/tasks/1
+GET http://localhost:3000/tasks/4
 
 ### Get non-existing task
 GET http://localhost:3000/tasks/999
@@ -30,6 +32,15 @@ Content-Type: application/json
 {
   "title": "Tarea actualizada"
 }
+
+### Update task description
+PUT http://localhost:3000/tasks/1
+Content-Type: application/json
+
+{
+  "description": "nueva descripción"
+}
+
 
 ### Mark task as done
 PUT http://localhost:3000/tasks/1
@@ -75,3 +86,5 @@ DELETE http://localhost:3000/tasks/abc
 
 ### List tasks after delete
 GET http://localhost:3000/tasks
+
+
