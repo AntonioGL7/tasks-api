@@ -2,8 +2,17 @@
 
 const prisma = require("../config/prisma");
 
-async function listTasks() {
-  return prisma.task.findMany({ orderBy: { id: "asc" } });
+async function listTasks({ page, limit } = {}) {
+  const query = {
+    orderBy: { id: "asc" },
+  };
+
+  if (page !== undefined && limit !== undefined) {
+    query.skip = (page - 1) * limit;
+    query.take = limit;
+  }
+
+  return prisma.task.findMany(query);
 }
 
 async function createTask(title, description) {

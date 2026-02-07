@@ -12,9 +12,26 @@ function parseId(req, res) {
   return taskId;
 }
 
-async function listTasks(req, res) {
-  const tasks = await tasksService.listTasks();
-  return res.json(tasks);
+async function listTasks(req, res, next) {
+  let { page, limit } = req.query;
+
+  page = page !== undefined ? Number(page) : undefined;
+  limit = limit !== undefined ? Number(limit) : undefined;
+
+  if (page !== undefined && (Number.isNaN(page) || page < 1)) {
+    return res.status(400).json({ error: "page must be a positive number" });
+  }
+
+  if (limit !== undefined && (Number.isNaN(limit) || limit < 1)) {
+    return res.status(400).json({ error: "limit must be a positive number" });
+  }
+
+  try {
+    const tasks = await tasksService.listTasks({ page, limit });
+    return res.json(tasks);
+  } catch (err) {
+    return next(err);
+  }
 }
 
 async function createTask(req, res) {
