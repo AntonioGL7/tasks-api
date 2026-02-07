@@ -28,7 +28,18 @@ async function listTasks(req, res, next) {
 
   try {
     const tasks = await tasksService.listTasks({ page, limit });
-    return res.json(tasks);
+
+    if (page === undefined || limit === undefined) {
+      return res.json(tasks);
+    }
+
+    const total = await tasksService.countTasks();
+    const pages = Math.ceil(total / limit);
+
+    return res.json({
+      data: tasks,
+      meta: { page, limit, total, pages },
+    });
   } catch (err) {
     return next(err);
   }

@@ -46,10 +46,15 @@ async function deleteTask(id) {
   return true;
 }
 
+async function countTasks() {
+  return prisma.task.count();
+}
+
 module.exports = {
   listTasks,
   createTask,
   getTaskById,
   updateTask,
   deleteTask,
+  countTasks,
 };
