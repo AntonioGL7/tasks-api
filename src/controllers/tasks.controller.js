@@ -1,12 +1,23 @@
 // src/controllers/tasks.controller.js
 
+const { Prisma } = require("@prisma/client");
 const tasksService = require("../services/tasks.service");
 
-function listTasks(req, res) {
-  return res.json(tasksService.listTasks());
+function parseId(req, res) {
+  const taskId = Number(req.params.id);
+  if (Number.isNaN(taskId)) {
+    res.status(400).json({ error: "id must be a number" });
+    return null;
+  }
+  return taskId;
 }
 
-function createTask(req, res) {
+async function listTasks(req, res) {
+  const tasks = await tasksService.listTasks();
+  return res.json(tasks);
+}
+
+async function createTask(req, res) {
   const { title } = req.body;
 
   if (!title || typeof title !== "string" || title.trim().length === 0) {
@@ -15,18 +26,15 @@ function createTask(req, res) {
     });
   }
 
-  const newTask = tasksService.createTask(title);
+  const newTask = await tasksService.createTask(title);
   return res.status(201).json(newTask);
 }
 
-function getTask(req, res) {
-  const taskId = Number(req.params.id);
+async function getTask(req, res) {
+  const taskId = parseId(req, res);
+  if (!taskId) return;
 
-  if (Number.isNaN(taskId)) {
-    return res.status(400).json({ error: "id must be a number" });
-  }
-
-  const task = tasksService.getTaskById(taskId);
+  const task = await tasksService.getTaskById(taskId);
   if (!task) {
     return res.status(404).json({ error: "task not found" });
   }
@@ -34,12 +42,9 @@ function getTask(req, res) {
   return res.json(task);
 }
 
-function updateTask(req, res) {
-  const taskId = Number(req.params.id);
-
-  if (Number.isNaN(taskId)) {
-    return res.status(400).json({ error: "id must be a number" });
-  }
+async function updateTask(req, res) {
+  const taskId = parseId(req, res);
+  if (!taskId) return;
 
   const { title, done } = req.body;
 
@@ -57,31 +62,40 @@ function updateTask(req, res) {
     }
   }
 
-  const updated = tasksService.updateTask(taskId, {
-    title: title !== undefined ? title.trim() : undefined,
-    done,
-  });
+  try {
+    const updated = await tasksService.updateTask(taskId, {
+      title: title !== undefined ? title.trim() : undefined,
+      done,
+    });
 
-  if (!updated) {
-    return res.status(404).json({ error: "task not found" });
+    return res.json(updated);
+  } catch (err) {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2025"
+    ) {
+      return res.status(404).json({ error: "task not found" });
+    }
+    throw err;
   }
-
-  return res.json(updated);
 }
 
-function deleteTask(req, res) {
-  const taskId = Number(req.params.id);
+async function deleteTask(req, res) {
+  const taskId = parseId(req, res);
+  if (!taskId) return;
 
-  if (Number.isNaN(taskId)) {
-    return res.status(400).json({ error: "id must be a number" });
+  try {
+    await tasksService.deleteTask(taskId);
+    return res.status(204).send();
+  } catch (err) {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2025"
+    ) {
+      return res.status(404).json({ error: "task not found" });
+    }
+    throw err;
   }
-
-  const deleted = tasksService.deleteTask(taskId);
-  if (!deleted) {
-    return res.status(404).json({ error: "task not found" });
-  }
-
-  return res.status(204).send();
 }
 
 module.exports = {

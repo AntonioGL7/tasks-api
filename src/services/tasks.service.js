@@ -1,43 +1,36 @@
 // src/services/tasks.service.js
 
-const tasks = [];
-let nextId = 1; // contador de IDs
+const prisma = require("../config/prisma");
 
-function listTasks() {
-  return tasks;
+async function listTasks() {
+  return prisma.task.findMany({ orderBy: { id: "asc" } });
 }
 
-function createTask(title) {
-  const newTask = {
-    id: nextId++, // ID único, no se repite
-    title: title.trim(),
-    done: false,
-    createdAt: new Date().toISOString(),
-  };
-
-  tasks.push(newTask);
-  return newTask;
+async function createTask(title) {
+  return prisma.task.create({
+    data: {
+      title: title.trim(),
+      done: false,
+    },
+  });
 }
 
-function getTaskById(id) {
-  return tasks.find((t) => t.id === id) || null;
+async function getTaskById(id) {
+  return prisma.task.findUnique({ where: { id } });
 }
 
-function updateTask(id, data) {
-  const task = getTaskById(id);
-  if (!task) return null;
-
-  if (data.title !== undefined) task.title = data.title;
-  if (data.done !== undefined) task.done = data.done;
-
-  return task;
+async function updateTask(id, data) {
+  return prisma.task.update({
+    where: { id },
+    data: {
+      title: data.title !== undefined ? data.title : undefined,
+      done: data.done !== undefined ? data.done : undefined,
+    },
+  });
 }
 
-function deleteTask(id) {
-  const index = tasks.findIndex((t) => t.id === id);
-  if (index === -1) return false;
-
-  tasks.splice(index, 1);
+async function deleteTask(id) {
+  await prisma.task.delete({ where: { id } });
   return true;
 }
 
