@@ -100,7 +100,22 @@ DELETE http://localhost:3000/tasks/abc
 GET http://localhost:3000/tasks
 
 ### Search tasks primera
-GET http://localhost:3000/tasks?search=esto
+GET http://localhost:3000/tasks?search=primera
 
 ### Search tasks tarea
 GET http://localhost:3000/tasks?search=tarea
+
+### Delete 2
+DELETE http://localhost:3000/tasks/2
+
+### List tasks
+GET http://localhost:3000/tasks
+
+### List tasks including deletes
+GET http://localhost:3000/tasks?includeDeleted=true
+
+### Return task
+PATCH http://localhost:3000/tasks/2/restore
+
+### Solo borradas
+GET http://localhost:3000/tasks?onlyDeleted=true
