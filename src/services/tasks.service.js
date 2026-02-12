@@ -7,9 +7,19 @@ async function listTasks({
   done,
   sort = "id",
   order = "asc",
+  search,
 } = {}) {
+  const where = {};
+
+  if (done !== undefined) where.done = done;
+
+  if (search !== undefined) {
+    where.title = { contains: search, mode: "insensitive" };
+  }
+
   const query = {
     orderBy: { [sort]: order },
+    ...(Object.keys(where).length ? { where } : {}),
   };
 
   if (done !== undefined) {
@@ -55,9 +65,17 @@ async function deleteTask(id) {
   return true;
 }
 
-async function countTasks({ done } = {}) {
+async function countTasks({ done, search } = {}) {
+  const where = {};
+
+  if (done !== undefined) where.done = done;
+
+  if (search !== undefined) {
+    where.title = { contains: search, mode: "insensitive" };
+  }
+
   return prisma.task.count({
-    where: done !== undefined ? { done } : undefined,
+    ...(Object.keys(where).length ? { where } : {}),
   });
 }
 

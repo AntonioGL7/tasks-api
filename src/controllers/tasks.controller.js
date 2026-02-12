@@ -11,7 +11,7 @@ function parseId(req, res) {
 }
 
 async function listTasks(req, res, next) {
-  let { page, limit, done, sort, order } = req.query;
+  let { page, limit, done, sort, order, search } = req.query;
 
   // page/limit
   page = page !== undefined ? Number(page) : undefined;
@@ -59,6 +59,16 @@ async function listTasks(req, res, next) {
     order = "asc";
   }
 
+  if (search !== undefined) {
+    if (typeof search !== "string") {
+      return res.status(400).json({ error: "search must be a string" });
+    }
+    search = search.trim();
+    if (search.length === 0) {
+      return res.status(400).json({ error: "search cannot be empty" });
+    }
+  }
+
   try {
     const tasks = await tasksService.listTasks({
       page,
@@ -66,6 +76,7 @@ async function listTasks(req, res, next) {
       done,
       sort,
       order,
+      search,
     });
 
     // Sin paginación: compatibilidad (devuelve array)
@@ -73,7 +84,7 @@ async function listTasks(req, res, next) {
       return res.json(tasks);
     }
 
-    const total = await tasksService.countTasks({ done });
+    const total = await tasksService.countTasks({ done, search });
     const pages = Math.ceil(total / limit);
 
     return res.json({

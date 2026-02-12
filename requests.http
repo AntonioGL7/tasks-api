@@ -4,6 +4,18 @@ GET http://localhost:3000/health
 ### List tasks
 GET http://localhost:3000/tasks
 
+### List tasks pages
+GET http://localhost:3000/tasks?page=1&limit=2
+
+### List tasks true
+GET http://localhost:3000/tasks?done=false
+
+### List tasks order
+GET http://localhost:3000/tasks?page=1&limit=2&sort=updatedAt&order=desc
+
+### List tasks done pages
+GET http://localhost:3000/tasks?done=false&page=1&limit=2
+
 ### Create task
 POST http://localhost:3000/tasks
 Content-Type: application/json
@@ -87,4 +99,8 @@ DELETE http://localhost:3000/tasks/abc
 ### List tasks after delete
 GET http://localhost:3000/tasks
 
+### Search tasks primera
+GET http://localhost:3000/tasks?search=esto
 
+### Search tasks tarea
+GET http://localhost:3000/tasks?search=tarea
