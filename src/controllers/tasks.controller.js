@@ -60,6 +60,21 @@ async function listTasks(req, res, next) {
   limit = parsePositiveIntQuery(res, limit, "limit");
   if (limit === null) return;
 
+  // Regla: o vienen ambos o ninguno. Si ninguno, ponemos defaults.
+  const hasPage = page !== undefined;
+  const hasLimit = limit !== undefined;
+
+  if ((hasPage && !hasLimit) || (!hasPage && hasLimit)) {
+    return res
+      .status(400)
+      .json({ error: "page and limit must be provided together" });
+  }
+
+  if (!hasPage && !hasLimit) {
+    page = 1;
+    limit = 20; // cambia a 50 si prefieres
+  }
+
   // done/includeDeleted
   done = parseBoolQuery(res, done, "done");
   if (done === null) return;
@@ -145,11 +160,6 @@ async function listTasks(req, res, next) {
       onlyDeleted,
       createdAtRange,
     });
-
-    // Compat: si no hay paginación -> array plano
-    if (page === undefined || limit === undefined) {
-      return res.json(tasks);
-    }
 
     const total = await tasksService.countTasks({
       done,
