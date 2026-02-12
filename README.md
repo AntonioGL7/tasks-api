@@ -9,6 +9,7 @@ Construir una API pequeña pero bien estructurada para practicar:
 - Diseño REST (endpoints, códigos de estado, validaciones)
 - Acceso a datos con PostgreSQL + Prisma
 - Estructura de proyecto backend (routes / controllers / services)
+- Borrado lógico (soft delete) y restauración
 - Buenas prácticas con Git y documentación
 
 ## Stack
@@ -17,30 +18,37 @@ Construir una API pequeña pero bien estructurada para practicar:
 - PostgreSQL
 - Prisma
 
-## Endpoints (plan)
+## Endpoints
 
-- GET `/tasks` — listar tareas
+- GET `/tasks` — listar tareas (con filtros, paginación y ordenación)
 - GET `/tasks/:id` — obtener una tarea
 - POST `/tasks` — crear una tarea
 - PUT `/tasks/:id` — actualizar una tarea
-- DELETE `/tasks/:id` — eliminar una tarea
+- DELETE `/tasks/:id` — borrado lógico (soft delete)
+- PATCH `/tasks/:id/restore` — restaurar tarea borrada
 
 ## Estado
 
-En desarrollo. Próximo paso: inicializar el proyecto y crear el modelo `Task`.
+API funcional con:
 
-# tasks-api
+- CRUD completo
+- Soft delete y restore
+- Paginación (`page`, `limit`)
+- Filtros (`done`, `search`, rango de fechas)
+- Ordenación (`sort`, `order`)
+- Inclusión y filtrado de tareas borradas
 
 ## Setup
 
-1. Install deps
-   npm install
+1. Install deps  
+   `npm install`
 
-2. Configure env
-   Copy .env.example to .env and set DATABASE_URL
+2. Configure env  
+   Create a `.env` file and set `DATABASE_URL`
 
-3. Run migrations
-   npx prisma migrate dev
+3. Run migrations  
+   `npx prisma migrate dev`  
+   `npx prisma generate`
 
-4. Start
-   npm run dev
+4. Start  
+   `npm run dev`
